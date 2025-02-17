@@ -355,14 +355,42 @@ func _get_end_beat(hit: Hit, callgroup: CallbackGroup) -> float:
 #endregion
 
 #region Time Getters
-func get_visual_beat(audio_stream_player: Node) -> float:
-	assert(audio_stream_player in _active_streams)
-	var t: float = audio_stream_player.get_playback_position() + AUDIO_OFFSET + AUDIO_SERVER_OFFSET + VISUAL_OFFSET
+
+func get_current_stream_player() -> Node:
+	if not _active_streams:
+		assert(false)
+		return null
+	return _active_streams.keys()[0]
+
+func get_current_beat(is_visual := true, audio_stream_player: Node = null) -> float:
+	if not audio_stream_player:
+		audio_stream_player = get_current_stream_player()
+	var t: float = audio_stream_player.get_playback_position() + AUDIO_OFFSET + AUDIO_SERVER_OFFSET + (VISUAL_OFFSET if is_visual else 0.0)
 	var d: RhythmData = _active_streams[audio_stream_player]
 	return d.get_beat(audio_stream_player.stream, t)
 
-func get_visual_bpm(audio_stream_player: Node) -> float:
-	var t: float = audio_stream_player.get_playback_position() + AUDIO_OFFSET + AUDIO_SERVER_OFFSET + VISUAL_OFFSET
+func get_current_time(is_visual := true, audio_stream_player: Node = null) -> float:
+	if not audio_stream_player:
+		audio_stream_player = get_current_stream_player()
+	return audio_stream_player.get_playback_position() + AUDIO_OFFSET + AUDIO_SERVER_OFFSET + (VISUAL_OFFSET if is_visual else 0.0)
+
+func get_current_bpm(is_visual := true, audio_stream_player: Node = null) -> float:
+	if not audio_stream_player:
+		audio_stream_player = get_current_stream_player()
+	var t: float = audio_stream_player.get_playback_position() + AUDIO_OFFSET + AUDIO_SERVER_OFFSET + (VISUAL_OFFSET if is_visual else 0.0)
 	var d: RhythmData = _active_streams[audio_stream_player]
 	return d.get_bpm(d.get_beat(audio_stream_player.stream, t))
+
+func convert_beat_to_time(b: float, audio_stream_player: Node = null) -> float:
+	if not audio_stream_player:
+		audio_stream_player = get_current_stream_player()
+	var d: RhythmData = _active_streams[audio_stream_player]
+	return d.get_time(audio_stream_player.stream, b)
+
+func convert_time_to_beat(t: float, audio_stream_player: Node = null) -> float:
+	if not audio_stream_player:
+		audio_stream_player = get_current_stream_player()
+	var d: RhythmData = _active_streams[audio_stream_player]
+	return d.get_beat(audio_stream_player.stream, t)
+
 #endregion
