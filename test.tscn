@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://clcflxjn2h4kt"]
+[gd_scene load_steps=4 format=3 uid="uid://clcflxjn2h4kt"]
 
 [ext_resource type="Script" uid="uid://djnc4kinishy" path="res://test.gd" id="1_37kl0"]
+[ext_resource type="AudioStream" uid="uid://y3bw8y5ubvuh" path="res://test_song.wav" id="2_6uqi0"]
+[ext_resource type="Resource" uid="uid://dmr48mnu667dk" path="res://test_song.xrns" id="3_ppyta"]
 
 [node name="Test" type="Control"]
 layout_mode = 3
@@ -10,5 +12,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_37kl0")
+song = ExtResource("2_6uqi0")
+rhythm_data = ExtResource("3_ppyta")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]

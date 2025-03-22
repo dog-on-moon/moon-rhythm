@@ -15,3 +15,11 @@ class_name Hit
 
 ## Extra information per hit can be defined externally here.
 @export var arguments: Dictionary = {}
+
+# do not ask
+static func create_from_note(_beat: float, _end: float, _note: Note) -> Hit:
+	var h := Hit.new()
+	h.beat = _beat
+	h.end = _end
+	h.note = _note
+	return h

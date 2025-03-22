@@ -394,3 +394,31 @@ func convert_time_to_beat(t: float, audio_stream_player: Node = null) -> float:
 	return d.get_beat(audio_stream_player.stream, t)
 
 #endregion
+
+#region Song Key System
+
+signal key_updated(key: Array[Note])
+
+var song_key_beat := -1.0
+var song_key_notes: Array[Note] = []
+
+var _calling_key_update := false
+
+func _on_key(h: Hit):
+	if song_key_beat != h.beat:
+		song_key_beat = h.beat
+		song_key_notes.clear()
+	song_key_notes.append(h.note)
+	if not _calling_key_update:
+		_calling_key_update = true
+		_key_update.call_deferred()
+
+func _key_update():
+	_calling_key_update = false
+	key_updated.emit(song_key_notes)
+
+func set_key_track(track: StringName):
+	clear_callbacks(self)
+	add_down_callback(self, track, _on_key, false)
+
+#endregion

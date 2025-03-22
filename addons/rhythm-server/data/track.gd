@@ -12,3 +12,9 @@ class_name Track
 ## The hits within the Track.
 ## These are sorted by beat time.
 @export var hits: Array[Hit] = []
+
+func sort_hits():
+	hits.sort_custom(
+		func (a: Hit, b: Hit):
+			return a.beat < b.beat
+			)
