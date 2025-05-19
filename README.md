@@ -33,15 +33,15 @@ RhythmServer supports an extreme amount of musical callbacks.
 Each one returns a Hit object, which is stored in a Track of a MusicData.
 
 There are two types of callbacks:
-1. One-shot (returns a Hit object)
-  1. `RhythmServer.add_cue_callback(X)`: Calls the function X beats before any Hit starts playing.
-  2. `RhythmServer.add_down_callback`: Calls the function whenever any Hit starts playing.
-  3. `RhythmServer.add_up_callback`: Calls the function whenever any Hit is released (only affects hits with defined releases).
-  4. `RhythmServer.add_end_callback(X)`: Calls the function X beats after the up callback.
-2. Process (returns a Hit object and a delta value for process)
-  1. `RhythmServer.add_inbound_callback(X)`: Called for every hit on every frame between their Cue and Down callbacks.
-  2. `RhythmServer.add_hold_callback`: Called for every hit on every frame between their Down and Up callbacks.
-  3. `RhythmServer.add_outbound_callback(X)`: Called for every hit on every frame between their Up and End callbacks.
+- One-shot (returns a Hit object)
+  - `RhythmServer.add_cue_callback(X)`: Calls the function X beats before any Hit starts playing.
+  - `RhythmServer.add_down_callback`: Calls the function whenever any Hit starts playing.
+  - `RhythmServer.add_up_callback`: Calls the function whenever any Hit is released (only affects hits with defined releases).
+  - `RhythmServer.add_end_callback(X)`: Calls the function X beats after the up callback.
+- Process (returns a Hit object and a delta value for process)
+  - `RhythmServer.add_inbound_callback(X)`: Called for every hit on every frame between their Cue and Down callbacks.
+  - `RhythmServer.add_hold_callback`: Called for every hit on every frame between their Down and Up callbacks.
+  - `RhythmServer.add_outbound_callback(X)`: Called for every hit on every frame between their Up and End callbacks.
 
 All above callback functions have four arguments in common:
 - owner: A node associated with this callback.
@@ -119,7 +119,17 @@ Node2D and Node3D alternatives are provided.
 
 ## 🎛️ Renoise Integration
 
+The hardest part about using this plugin is creating the RhythmData resources in sync with your music.
+But there's a better way!
 
+This plugin also provides an **import plugin for Renoise project files.** This allows Godot to parse
+Renoise projects and interpret their stored hits, pitches, timings, and BPM changes as RhythmData.
+
+The import plugin has four options:
+1. Instrument Prefix: Importing will only read instruments that have this defined prefix.
+2. Auto Beat Track: When enabled, the exported RhythmData will generate an automatic BEAT track.
+3. Override BPM: The defined BPMs in the project file are ignored, and this is used instead.
+4. Ignore Releases: Prevents OFF events in Renoise from being interpreted as hit releases.
 
 ## Installation
 
