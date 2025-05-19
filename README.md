@@ -1,4 +1,4 @@
-![screen-shot](https://github.com/dog-on-moon/moon-rhythm/blob/main/readme/banner.png)
+![screen-shot](https://github.com/dog-on-moon/moon-rhythm/blob/main/readme/banner1.png)
 
 # 🌙 moon-rhythm - see more: [moonSuite](https://dog-game.xyz/tools/)
 
