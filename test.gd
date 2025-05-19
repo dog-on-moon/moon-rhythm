@@ -9,7 +9,6 @@ func _ready() -> void:
 	# Setup callbacks.
 	RhythmServer.add_down_callback(self, &"beat", _on_down)
 	RhythmServer.set_key_track(&"key")
-	RhythmServer.key_updated.connect(key_updated)
 	
 	# Begin song.
 	audio_stream_player.stream = song
@@ -18,6 +17,3 @@ func _ready() -> void:
 
 func _on_down(h: Hit):
 	print('hit %s' % h.beat)
-
-func key_updated(key_notes: Array[Note]):
-	print(key_notes)

@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-const RenoiseImportPlugin = preload("res://addons/rhythm-server/renoise/import_plugin.gd")
+const RenoiseImportPlugin = preload("uid://cqykcteae63g7")
 var renoise_import_plugin: RenoiseImportPlugin
 
 func _enter_tree():

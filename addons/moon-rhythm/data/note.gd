@@ -31,6 +31,12 @@ func get_pitch_scale(root_pitch := Pitch.C, root_octave := 3) -> float:
 	var dist := total_pitch - get_total_pitch(root_pitch, root_octave)
 	return pow(TWELVTH_ROOT, dist)
 
+static func create(_pitch := Pitch.C, _octave := 3) -> Note:
+	var n := Note.new()
+	n.pitch = _pitch
+	n.octave = _octave
+	return n
+
 func transpose(steps: int):
 	pitch += steps
 	while pitch > 12:

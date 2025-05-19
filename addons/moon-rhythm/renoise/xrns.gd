@@ -1,6 +1,16 @@
 class_name XRNS
 ## A script containing several classes for building/reading an XRNS file.
 
+const DEBUG_PRINT := false
+
+static var _loop_context := {}
+
+static func _print_loop(name: String):
+	if DEBUG_PRINT:
+		var idx: int = _loop_context.get_or_add(name, 0)
+		_loop_context[name] += 1
+		print("%s: %s" % [idx, name])
+
 class XRNSFile extends RefCounted:
 	
 	var global_song_data: XRNSGlobalSongData = null
@@ -16,13 +26,17 @@ class XRNSFile extends RefCounted:
 	
 	static func create_from_xml(xml: XMLParser) -> XRNSFile:
 		var f := XRNSFile.new()
+		XRNS._loop_context.clear()
 		
 		# Handle XML parsing.
+		var idx := -1
 		while xml.read() != ERR_FILE_EOF:
+			XRNS._print_loop("Main Loop")
 			if XRNS.is_start_element(xml, "GlobalSongData"):
 				f.global_song_data = XRNSGlobalSongData.create_from_xml(xml)
 			elif XRNS.is_start_element(xml, "Instruments"):
 				while true:
+					XRNS._print_loop("Instruments Loop")
 					if xml.read() == ERR_FILE_EOF: return f
 					XRNS.skip_whitespace(xml)
 					if XRNS.is_end_element(xml, "Instruments"): break
@@ -31,6 +45,7 @@ class XRNSFile extends RefCounted:
 				#print('read %s instruments' % f.instruments.size())
 			elif XRNS.is_start_element(xml, "Tracks"):
 				while true:
+					XRNS._print_loop("Tracks Loop")
 					if xml.read() == ERR_FILE_EOF: return f
 					XRNS.skip_whitespace(xml)
 					if XRNS.is_end_element(xml, "Tracks"): break
@@ -43,6 +58,7 @@ class XRNSFile extends RefCounted:
 				#print('read %s tracks' % f.tracks.size())
 			elif XRNS.is_start_element(xml, "Patterns"):
 				while true:
+					XRNS._print_loop("Patterns Loop")
 					if xml.read() == ERR_FILE_EOF: return f
 					XRNS.skip_whitespace(xml)
 					if XRNS.is_end_element(xml, "Patterns"): break
@@ -117,7 +133,7 @@ class XRNSFile extends RefCounted:
 	
 	func get_lpb(_line_idx: int) -> int:
 		if _line_idx not in lpb_cache:
-			var max_lpb_index: float = lpb_map.keys().max()
+			var max_lpb_index = lpb_map.keys().max()
 			if _line_idx >= max_lpb_index:
 				lpb_cache[_line_idx] = lpb_map[max_lpb_index]
 			else:
@@ -140,7 +156,7 @@ class XRNSFile extends RefCounted:
 	
 	func get_bpm(beat: float) -> float:
 		if beat not in bpm_cache:
-			var max_bpm_index: float = bpm_map.keys().max()
+			var max_bpm_index = bpm_map.keys().max()
 			if beat >= max_bpm_index:
 				bpm_cache[beat] = bpm_map[max_bpm_index]
 			else:
@@ -213,6 +229,7 @@ class XRNSInstrument extends RefCounted:
 	static func create_from_xml(xml: XMLParser) -> XRNSInstrument:
 		var inst := XRNSInstrument.new()
 		while xml.read() != ERR_FILE_EOF:
+			XRNS._print_loop("Instrument - Main Loop")
 			if XRNS.is_end_element(xml, "Instrument"):
 				break
 			elif XRNS.is_start_element(xml, "Name"):
@@ -220,6 +237,7 @@ class XRNSInstrument extends RefCounted:
 				inst.name = xml.get_node_data()
 			elif XRNS.is_start_element(xml, "GlobalProperties"):
 				while true:
+					XRNS._print_loop("Instrument - GlobalProperties Loop")
 					if XRNS.is_end_element(xml, "GlobalProperties"): break
 					if xml.read() == ERR_FILE_EOF: return inst
 					if XRNS.is_start_element(xml, "Transpose"):
@@ -244,6 +262,7 @@ class XRNSTrack extends RefCounted:
 	static func create_from_xml(xml: XMLParser) -> XRNSTrack:
 		var track := XRNSTrack.new()
 		while xml.read() != ERR_FILE_EOF:
+			XRNS._print_loop("Track - Main Loop")
 			if XRNS.is_end_element(xml, "SequencerTrack"):
 				break
 			elif XRNS.is_end_element(xml, "SequencerMasterTrack"):
@@ -277,6 +296,7 @@ class XRNSPattern extends RefCounted:
 			var col := EffectColumn.new()
 			var real := false
 			while xml.read() != ERR_FILE_EOF:
+				XRNS._print_loop("EffectColumn - Main Loop")
 				if XRNS.is_end_element(xml, "EffectColumn"):
 					break
 				elif XRNS.is_start_element(xml, "Number"):
@@ -299,6 +319,7 @@ class XRNSPattern extends RefCounted:
 			var col := NoteColumn.new()
 			var real := false
 			while xml.read() != ERR_FILE_EOF:
+				XRNS._print_loop("NoteColumn - Main Loop")
 				if XRNS.is_end_element(xml, "NoteColumn"):
 					break
 				elif XRNS.is_start_element(xml, "Note"):
@@ -324,11 +345,13 @@ class XRNSPattern extends RefCounted:
 		static func create_from_xml(xml: XMLParser, note_cols: int, fx_cols: int) -> Line:
 			var line := Line.new()
 			while xml.read() != ERR_FILE_EOF:
+				XRNS._print_loop("Line - Main Loop")
 				if XRNS.is_end_element(xml, "Line"):
 					break
 				elif XRNS.is_start_element(xml, "NoteColumns"):
 					var _idx := 0
 					while true:
+						XRNS._print_loop("Line - NoteColumn Loop")
 						if XRNS.is_end_element(xml, "NoteColumns"): break
 						if xml.read() == ERR_FILE_EOF: return line
 						if XRNS.is_empty_element(xml, "NoteColumn"):
@@ -339,6 +362,7 @@ class XRNSPattern extends RefCounted:
 				elif XRNS.is_start_element(xml, "EffectColumns"):
 					var _idx := 0
 					while true:
+						XRNS._print_loop("Line - EffectColumn Loop")
 						if XRNS.is_end_element(xml, "EffectColumns"): break
 						if xml.read() == ERR_FILE_EOF: return line
 						if XRNS.is_empty_element(xml, "EffectColumn"):
@@ -355,6 +379,7 @@ class XRNSPattern extends RefCounted:
 		static func create_from_xml(xml: XMLParser, track: XRNSTrack) -> PatternTrack:
 			var pattern_track := PatternTrack.new()
 			while xml.read() != ERR_FILE_EOF:
+				XRNS._print_loop("PatternTrack - Main Loop")
 				if XRNS.is_end_element(xml, "PatternTrack"):
 					break
 				elif XRNS.is_end_element(xml, "PatternMasterTrack"):
@@ -365,6 +390,7 @@ class XRNSPattern extends RefCounted:
 					xml.read()
 					pattern_track.alias_pattern_index = int(xml.get_node_data())
 				elif XRNS.is_start_element(xml, "Lines"):
+					XRNS._print_loop("PatternTrack - Lines Loop")
 					while true:
 						if XRNS.is_end_element(xml, "Lines"): break
 						if xml.read() == ERR_FILE_EOF: return pattern_track
@@ -389,6 +415,7 @@ class XRNSPattern extends RefCounted:
 		var pattern := XRNSPattern.new()
 		var track_idx := -1
 		while xml.read() != ERR_FILE_EOF:
+			XRNS._print_loop("Pattern - Main Loop")
 			if XRNS.is_end_element(xml, "Pattern"):
 				break
 			elif XRNS.is_start_element(xml, "NumberOfLines"):
@@ -396,6 +423,7 @@ class XRNSPattern extends RefCounted:
 				pattern.lines = int(xml.get_node_data())
 			elif XRNS.is_start_element(xml, "Tracks"):
 				while true:
+					XRNS._print_loop("Pattern - Tracks Loop")
 					if XRNS.is_end_element(xml, "Tracks"): break
 					if xml.read() == ERR_FILE_EOF: return pattern
 					if XRNS.is_start_element(xml, "PatternTrack") or XRNS.is_start_element(xml, "PatternMasterTrack") or XRNS.is_start_element(xml, "PatternSendTrack"):
@@ -411,10 +439,12 @@ class XRNSPatternSequence extends RefCounted:
 		var pattern_seq := XRNSPatternSequence.new()
 		
 		while xml.read() != ERR_FILE_EOF:
+			XRNS._print_loop("PatternSequence - Main Loop")
 			if XRNS.is_end_element(xml, "PatternSequence"):
 				break
 			elif XRNS.is_start_element(xml, "SequenceEntries"):
 				while true:
+					XRNS._print_loop("PatternSequence - SequenceEntries Loop")
 					if XRNS.is_end_element(xml, "SequenceEntries"): break
 					if xml.read() == ERR_FILE_EOF: return pattern_seq
 					if XRNS.is_start_element(xml, "Pattern"):
@@ -436,6 +466,7 @@ static func is_empty_element(xml: XMLParser, name: String) -> bool:
 
 static func skip_whitespace(xml: XMLParser):
 	while xml.get_node_type() == XMLParser.NODE_TEXT:
+		XRNS._print_loop("Skip Whitespace")
 		var data := xml.get_node_data()
 		match data:
 			"\n", "\t", " ":

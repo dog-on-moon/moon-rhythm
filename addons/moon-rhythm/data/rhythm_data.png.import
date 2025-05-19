@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cvko8dcj425xx"
-path="res://.godot/imported/rhythm_data.png-73baf5e55fb0acbd177ebaf7415c4146.ctex"
+path="res://.godot/imported/rhythm_data.png-48d7af8621d918113b52471555df3560.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/rhythm-server/data/rhythm_data.png"
-dest_files=["res://.godot/imported/rhythm_data.png-73baf5e55fb0acbd177ebaf7415c4146.ctex"]
+source_file="res://addons/moon-rhythm/data/rhythm_data.png"
+dest_files=["res://.godot/imported/rhythm_data.png-48d7af8621d918113b52471555df3560.ctex"]
 
 [params]
 

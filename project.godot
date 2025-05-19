@@ -10,14 +10,16 @@ config_version=5
 
 [application]
 
-config/name="Rhythm Server"
+config/name="moon-rhythm"
+config/description="Godot utilities for synchronizing music to gameplay."
+config/version="1.0.0"
 run/main_scene="uid://clcflxjn2h4kt"
 config/features=PackedStringArray("4.4", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="uid://by7m8setehblh"
 
 [autoload]
 
-RhythmServer="*res://addons/rhythm-server/rhythm_server.gd"
+RhythmServer="*res://addons/moon-rhythm/rhythm_server.gd"
 
 [editor_plugins]
 

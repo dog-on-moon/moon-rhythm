@@ -226,6 +226,8 @@ func _process(delta):
 					# Have we reached the next hit cue yet?
 					while true:
 						# Determine the hit and target time.
+						if callgroup.next_hit_index >= total_hits:
+							callgroup.next_hit_index = 0
 						var hit: Hit = track.hits[callgroup.next_hit_index]
 						var target_beat := 0.0
 						match callgroup.mode:
@@ -261,6 +263,8 @@ func _process(delta):
 				_:
 					# Update our first hit index.
 					while true:
+						if callgroup.first_hit_index >= total_hits:
+							callgroup.first_hit_index = 0
 						var hit: Hit = track.hits[callgroup.first_hit_index]
 						var end_beat := _get_end_beat(hit, callgroup)
 						var check_beat := (
@@ -285,6 +289,8 @@ func _process(delta):
 					
 					# Update our next hit index.
 					while true:
+						if callgroup.next_hit_index >= total_hits:
+							callgroup.next_hit_index = 0
 						var hit: Hit = track.hits[callgroup.next_hit_index]
 						var start_beat := _get_start_beat(hit, callgroup)
 						var check_beat := (
@@ -354,7 +360,7 @@ func _get_end_beat(hit: Hit, callgroup: CallbackGroup) -> float:
 
 #endregion
 
-#region Time Getters
+#region Getter API
 
 func get_current_stream_player() -> Node:
 	if not _active_streams:
@@ -381,6 +387,25 @@ func get_current_bpm(is_visual := true, audio_stream_player: Node = null) -> flo
 	var d: RhythmData = _active_streams[audio_stream_player]
 	return d.get_bpm(d.get_beat(audio_stream_player.stream, t))
 
+func get_current_playback_beat(audio_stream_player: Node = null) -> float:
+	if not audio_stream_player:
+		audio_stream_player = get_current_stream_player()
+	var t: float = audio_stream_player.get_playback_position()
+	var d: RhythmData = _active_streams[audio_stream_player]
+	return d.get_beat(audio_stream_player.stream, t)
+
+func get_current_playback_position(audio_stream_player: Node = null) -> float:
+	if not audio_stream_player:
+		audio_stream_player = get_current_stream_player()
+	return audio_stream_player.get_playback_position()
+
+func get_current_playback_bpm(audio_stream_player: Node = null) -> float:
+	if not audio_stream_player:
+		audio_stream_player = get_current_stream_player()
+	var t: float = audio_stream_player.get_playback_position()
+	var d: RhythmData = _active_streams[audio_stream_player]
+	return d.get_bpm(d.get_beat(audio_stream_player.stream, t))
+
 func convert_beat_to_time(b: float, audio_stream_player: Node = null) -> float:
 	if not audio_stream_player:
 		audio_stream_player = get_current_stream_player()
@@ -393,32 +418,41 @@ func convert_time_to_beat(t: float, audio_stream_player: Node = null) -> float:
 	var d: RhythmData = _active_streams[audio_stream_player]
 	return d.get_beat(audio_stream_player.stream, t)
 
+func get_track(track_name: StringName) -> Track:
+	for rd: RhythmData in _active_streams.values():
+		for track in rd.tracks:
+			if track.name == track_name:
+				return track
+	return null
+
 #endregion
 
 #region Song Key System
 
-signal key_updated(key: Array[Note])
+signal key_changed(track: StringName, notes: Array[Note])
 
-var song_key_beat := -1.0
-var song_key_notes: Array[Note] = []
+var song_key_beat: Dictionary[StringName, float] = {}
+var song_key_notes: Dictionary[StringName, Array] = {}
 
-var _calling_key_update := false
+func _on_key(h: Hit, track: StringName):
+	if song_key_beat[track] != h.beat:
+		song_key_beat[track] = h.beat
+		song_key_notes[track].clear()
+	var a: Array[Note] = song_key_notes[track]
+	a.append(h.note)
+	a.sort_custom(_sort_notes)
+	key_changed.emit(track, a)
 
-func _on_key(h: Hit):
-	if song_key_beat != h.beat:
-		song_key_beat = h.beat
-		song_key_notes.clear()
-	song_key_notes.append(h.note)
-	if not _calling_key_update:
-		_calling_key_update = true
-		_key_update.call_deferred()
-
-func _key_update():
-	_calling_key_update = false
-	key_updated.emit(song_key_notes)
+func _sort_notes(a: Note, b: Note):
+	return a.total_pitch < b.total_pitch
 
 func set_key_track(track: StringName):
-	clear_callbacks(self)
-	add_down_callback(self, track, _on_key, false)
+	song_key_beat[track] = -1.0
+	var a: Array[Note] = []
+	song_key_notes[track] = a
+	add_down_callback(self, track, _on_key.bind(track), false)
+
+func get_key(track: StringName) -> Array[Note]:
+	return song_key_notes.get(track, [])
 
 #endregion
